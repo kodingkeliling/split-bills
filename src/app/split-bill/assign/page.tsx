@@ -36,15 +36,15 @@ export default function AssignPage() {
                                 <span>Subtotal</span>
                                 <span className="text-gray-900">Rp {billData.subtotal.toLocaleString()}</span>
                             </div>
-                            <div className="flex justify-between items-center text-tertiary">
-                                <div className="flex items-center gap-1.5">
-                                    <span>Pajak & Layanan</span>
-                                    <HelpCircle className="size-4" />
-                                    <span className="bg-brand-50 text-brand-secondary text-[10px] px-2 py-0.5 rounded-full border border-brand-100 uppercase tracking-tighter">
+                            <div className="flex justify-between items-center text-tertiary gap-2">
+                                <div className="flex items-center gap-1 min-w-0">
+                                    <span className="truncate">Pajak & Layanan</span>
+                                    <HelpCircle className="size-3.5 shrink-0" />
+                                    <span className="bg-brand-50 text-brand-secondary text-[9px] px-1.5 py-0.5 rounded-full border border-brand-100 uppercase tracking-tighter whitespace-nowrap shrink-0">
                                         Dibagi Rata
                                     </span>
                                 </div>
-                                <span className="text-gray-900">Rp {(billData.tax + billData.serviceCharge).toLocaleString()}</span>
+                                <span className="text-gray-900 shrink-0">Rp {(billData.tax + billData.serviceCharge).toLocaleString()}</span>
                             </div>
                         </div>
 
