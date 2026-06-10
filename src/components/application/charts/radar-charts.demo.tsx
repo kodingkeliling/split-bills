@@ -7,16 +7,19 @@ import { cx } from "@/utils/cx";
 
 interface CustomRadarChartTickProps {
     payload: { value: string };
-    x: number;
-    y: number;
-    textAnchor: string;
+    x: number | string;
+    y: number | string;
+    textAnchor: "start" | "middle" | "end" | "inherit";
     stroke: string;
-    radius: number;
+    radius?: number;
 }
 
 export const CustomRadarChartTick = ({ payload, x, y, textAnchor, stroke, radius }: CustomRadarChartTickProps) => {
     const textRef = useRef<SVGTextElement>(null);
     const rectRef = useRef<SVGRectElement>(null);
+
+    const numericX = typeof x === "string" ? parseFloat(x) : x;
+    const numericY = typeof y === "string" ? parseFloat(y) : y;
 
     useEffect(() => {
         if (textRef.current && rectRef.current) {
@@ -30,21 +33,21 @@ export const CustomRadarChartTick = ({ payload, x, y, textAnchor, stroke, radius
             rectRef.current.setAttribute("x", (textBoundingBox.x - EXTRA_WIDTH / 2).toString());
             rectRef.current.setAttribute("y", (textBoundingBox.y - EXTRA_HEIGHT / 2).toString());
         }
-    }, [x, y, radius]);
+    }, [numericX, numericY, radius]);
 
     return (
         <Fragment>
-            <rect ref={rectRef} x={x} y={y} rx={11} className="fill-utility-gray-50 stroke-utility-gray-200 stroke-1"></rect>
+            <rect ref={rectRef} x={numericX} y={numericY} rx={11} className="fill-utility-gray-50 stroke-utility-gray-200 stroke-1"></rect>
             <text
                 ref={textRef}
-                x={x}
-                y={y + 5}
+                x={numericX}
+                y={numericY + 5}
                 radius={radius}
                 stroke={stroke}
                 textAnchor={textAnchor}
                 className="recharts-text recharts-polar-angle-axis-tick-value"
             >
-                <tspan x={x} dy="0em" className="fill-utility-gray-700 text-xs font-medium">
+                <tspan x={numericX} dy="0em" className="fill-utility-gray-700 text-xs font-medium">
                     {payload.value}
                 </tspan>
             </text>

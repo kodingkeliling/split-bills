@@ -2,7 +2,8 @@
 
 import type { HTMLAttributes, PropsWithChildren } from "react";
 import { Fragment, useContext, useState } from "react";
-import { type CalendarDate, getLocalTimeZone, today } from "@internationalized/date";
+import type { CalendarDate, CalendarDateTime, ZonedDateTime } from "@internationalized/date";
+import { getLocalTimeZone, today } from "@internationalized/date";
 import { ChevronLeft, ChevronRight } from "@untitledui/icons";
 import type { CalendarProps as AriaCalendarProps, DateValue } from "react-aria-components";
 import {
@@ -25,7 +26,26 @@ export const CalendarContextProvider = ({ children }: PropsWithChildren) => {
     const [value, onChange] = useState<DateValue | null>(null);
     const [focusedValue, onFocusChange] = useState<DateValue | undefined>();
 
-    return <AriaCalendarContext.Provider value={{ value, onChange, focusedValue, onFocusChange }}>{children}</AriaCalendarContext.Provider>;
+    const handleChange = (newValue: any) => {
+        onChange(newValue);
+    };
+
+    const handleFocusChange = (newValue: any) => {
+        onFocusChange(newValue);
+    };
+
+    return (
+        <AriaCalendarContext.Provider
+            value={{
+                value,
+                onChange: handleChange,
+                focusedValue,
+                onFocusChange: handleFocusChange,
+            }}
+        >
+            {children}
+        </AriaCalendarContext.Provider>
+    );
 };
 
 const PresetButton = ({ value, children, ...props }: HTMLAttributes<HTMLButtonElement> & { value: CalendarDate }) => {
