@@ -7,17 +7,15 @@ const groq = new Groq({
 
 export async function POST(req: NextRequest) {
     try {
+        if (!process.env.GROQ_API_KEY) {
+            throw new Error('GROQ_API_KEY is missing in environment variables');
+        }
+
         const formData = await req.formData();
         const file = formData.get('file') as File;
 
         if (!file) {
             return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
-        }
-
-        // If no API key, return mock data
-        if (!process.env.GROQ_API_KEY) {
-            console.warn('GROQ_API_KEY not found. Returning mock data.');
-            return NextResponse.json(getMockBillData());
         }
 
         // Convert file to base64
@@ -27,7 +25,8 @@ export async function POST(req: NextRequest) {
         const mimeType = file.type || 'image/jpeg';
 
         const prompt = `You are an expert at reading Indonesian restaurant receipts.
-Extract the bill data from this receipt image and return ONLY a valid JSON object (no markdown, no code block, no extra text).
+Extract the bill data from this receipt image and return ONLY a valid JSON object.
+Do NOT include any markdown formatting, code blocks, or explanatory text. Just the raw JSON string.
 
 The JSON must have this exact structure:
 {
@@ -46,10 +45,11 @@ Rules:
 5. "serviceCharge" comes from "Biaya Layanan" or "Service Charge" lines.
 6. "subtotal" is before tax/service. "total" is the final amount.
 7. Only real purchased items in "items" — exclude tax, service, subtotal, cash rows.
-8. Output ONLY the raw JSON string. Nothing else.`;
+8. If you cannot find tax or service charge, set them to 0.
+9. Ensure all numeric values are integers.`;
 
         const response = await groq.chat.completions.create({
-            model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+            model: 'llama-3.2-11b-vision-preview',
             messages: [
                 {
                     role: 'user',
@@ -72,8 +72,15 @@ Rules:
         });
 
         const text = response.choices[0]?.message?.content || '';
-        // Clean up any accidental markdown code blocks
-        const jsonString = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        // More aggressive cleanup for JSON string
+        let jsonString = text.trim();
+        if (jsonString.includes('```')) {
+            const match = jsonString.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+            if (match) {
+                jsonString = match[1];
+            }
+        }
+        jsonString = jsonString.trim();
 
         try {
             const parsedData = JSON.parse(jsonString);
@@ -107,26 +114,10 @@ Rules:
             return NextResponse.json(parsedData);
         } catch (e) {
             console.error('Failed to parse Groq JSON response:', text);
-            return NextResponse.json({ error: 'Failed to parse bill data. Please try a clearer image.' }, { status: 500 });
+            return NextResponse.json({ error: 'Gagal memproses data struk. Pastikan foto terlihat jelas.' }, { status: 500 });
         }
     } catch (error: any) {
         console.error('OCR Error:', error);
-        return NextResponse.json({ error: error.message || 'Error processing bill' }, { status: 500 });
+        return NextResponse.json({ error: error.message || 'Gagal memproses struk' }, { status: 500 });
     }
-}
-
-function getMockBillData() {
-    return {
-        items: [
-            { id: 'item-0', name: 'Paket Iftar Nasi Goreng (1)', price: 60000, quantity: 1, assignedTo: [] },
-            { id: 'item-1', name: 'Paket Iftar Nasi Goreng (2)', price: 60000, quantity: 1, assignedTo: [] },
-            { id: 'item-2', name: 'Paket Iftar Nasi Goreng (3)', price: 60000, quantity: 1, assignedTo: [] },
-            { id: 'item-3', name: 'Paket Iftar Chicken (1)', price: 50000, quantity: 1, assignedTo: [] },
-            { id: 'item-4', name: 'Paket Iftar Chicken (2)', price: 50000, quantity: 1, assignedTo: [] },
-        ],
-        tax: 28000,
-        serviceCharge: 14000,
-        subtotal: 280000,
-        total: 322000,
-    };
 }
