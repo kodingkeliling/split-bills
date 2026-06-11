@@ -13,6 +13,8 @@ import { FeaturedIcon } from '@/components/foundations/featured-icon/featured-ic
 import { Input } from '@/components/base/input/input';
 import { BillItem } from '@/types/bill';
 import { formatRupiah, parseRupiah } from '@/utils/currency';
+import { toast } from 'sonner';
+import { IconNotification } from '@/components/application/notifications/notifications';
 
 interface ManualItem {
     id: string;
@@ -53,10 +55,22 @@ export default function UploadPage() {
             if (!response.ok) throw new Error('Failed to process bill');
 
             const data = await response.json();
+            
+            if (data.error) {
+                throw new Error(data.error);
+            }
+
             setBillData(data);
             router.push('/split-bill/assign');
-        } catch {
-            alert('Gagal memproses struk. Silakan coba lagi.');
+        } catch (error: any) {
+            toast.custom((t) => (
+                <IconNotification
+                    title="Gagal Memproses Struk"
+                    description={error.message || "Terjadi kesalahan saat membaca struk. Silakan coba lagi dengan foto yang lebih jelas."}
+                    color="error"
+                    onClose={() => toast.dismiss(t)}
+                />
+            ));
         } finally {
             setIsUploading(false);
         }
@@ -84,7 +98,14 @@ export default function UploadPage() {
     const handleManualSubmit = () => {
         const validItems = manualItems.filter((i) => i.name.trim() && i.price.trim());
         if (validItems.length === 0) {
-            alert('Tambahkan minimal satu item terlebih dahulu.');
+            toast.custom((t) => (
+                <IconNotification
+                    title="Data Tidak Lengkap"
+                    description="Tambahkan minimal satu item dengan nama dan harga terlebih dahulu."
+                    color="warning"
+                    onClose={() => toast.dismiss(t)}
+                />
+            ));
             return;
         }
 

@@ -5,6 +5,7 @@ import { Theme } from "@/providers/theme";
 import "@/styles/globals.css";
 import { BillProvider } from "@/providers/bill-provider";
 import { HistoryProvider } from "@/providers/history-provider";
+import { Toaster } from "@/components/application/notifications/toaster";
 import { cx } from "@/utils/cx";
 
 const inter = Inter({
@@ -38,6 +39,7 @@ export default function RootLayout({
                     <Theme>
                         <HistoryProvider>
                             <BillProvider>{children}</BillProvider>
+                            <Toaster />
                         </HistoryProvider>
                     </Theme>
                 </RouteProvider>

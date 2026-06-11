@@ -6,6 +6,9 @@ import { Button } from '@/components/base/buttons/button';
 import { Share01 } from '@untitledui/icons';
 import { Avatar } from '@/components/base/avatar/avatar';
 
+import { toast } from 'sonner';
+import { IconNotification } from '@/components/application/notifications/notifications';
+
 export const SummaryTable = () => {
     const { people, billData } = useBill();
 
@@ -48,7 +51,14 @@ export const SummaryTable = () => {
             )
             .join('\n\n');
         navigator.clipboard.writeText(`Bill Breakdown:\n\n${text}`);
-        alert('Summary copied to clipboard!');
+        toast.custom((t) => (
+            <IconNotification
+                title="Berhasil Disalin"
+                description="Ringkasan tagihan telah disalin ke clipboard. Silakan tempel di WhatsApp."
+                color="success"
+                onClose={() => toast.dismiss(t)}
+            />
+        ));
     };
 
     return (
