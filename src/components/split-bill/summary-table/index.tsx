@@ -33,12 +33,18 @@ export const SummaryTable = () => {
         };
     });
 
+    const parseItemName = (name: string) => {
+        const match = name.match(/(.*)\s\((\d+)\)$/);
+        if (match) return match[1];
+        return name;
+    };
+
     const handleShare = () => {
         const text = individualTotals
             .map(
                 (t) =>
                     `*${t.person.name}*: ${t.finalTotal.toLocaleString()}\n` +
-                    t.items.map((i) => `- ${i.name}`).join('\n')
+                    t.items.map((i) => `- ${parseItemName(i.name)}`).join('\n')
             )
             .join('\n\n');
         navigator.clipboard.writeText(`Bill Breakdown:\n\n${text}`);
@@ -78,7 +84,7 @@ export const SummaryTable = () => {
                                 <div key={item.id} className="flex justify-between text-sm text-secondary">
                                     <span className="flex items-center gap-2">
                                         <span className="size-1.5 rounded-full bg-brand-solid/30" />
-                                        {item.name} {item.assignedTo.length > 1 ? `(Split ${item.assignedTo.length})` : ''}
+                                        {parseItemName(item.name)} {item.assignedTo.length > 1 ? `(Split ${item.assignedTo.length})` : ''}
                                     </span>
                                     <span className="font-bold text-primary">
                                         {((item.price * item.quantity) / item.assignedTo.length).toLocaleString()}

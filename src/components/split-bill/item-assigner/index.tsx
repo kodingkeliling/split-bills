@@ -6,10 +6,26 @@ import { Button } from '@/components/base/buttons/button';
 import { Check } from '@untitledui/icons';
 import { Avatar } from '@/components/base/avatar/avatar';
 
+import { Badge } from '@/components/base/badges/badges';
+
 export const ItemAssigner = () => {
     const { people, billData, assignItemToPerson, unassignItemFromPerson } = useBill();
 
     if (!billData) return null;
+
+    const parseItemName = (name: string) => {
+        const match = name.match(/(.*)\s\((\d+)\)$/);
+        if (match) {
+            return {
+                baseName: match[1],
+                itemNumber: match[2],
+            };
+        }
+        return {
+            baseName: name,
+            itemNumber: null,
+        };
+    };
 
     const toggleAssignment = (itemId: string, personId: string) => {
         const item = billData.items.find((i) => i.id === itemId);
@@ -22,17 +38,24 @@ export const ItemAssigner = () => {
 
     return (
         <div className="space-y-6 pb-96">
-            {billData.items.map((item) => (
-                <div
-                    key={item.id}
-                    className="bg-white p-6 rounded-[32px] border-2 border-secondary/50 shadow-sm transition-all hover:border-brand-primary group relative overflow-hidden"
-                >
-                    {/* Item Header */}
-                    <div className="flex justify-between items-start mb-2">
-                        <h4 className="text-xl font-black text-gray-900 pr-4">
-                            {item.name} {item.quantity > 1 && <span className="text-tertiary text-sm font-medium">x{item.quantity}</span>}
-                        </h4>
-                    </div>
+            {billData.items.map((item) => {
+                const { baseName, itemNumber } = parseItemName(item.name);
+                return (
+                    <div
+                        key={item.id}
+                        className="bg-white p-6 rounded-[32px] border-2 border-secondary/50 shadow-sm transition-all hover:border-brand-primary group relative overflow-hidden"
+                    >
+                        {/* Item Header */}
+                        <div className="flex justify-between items-start mb-2">
+                            <h4 className="text-xl font-black text-gray-900 pr-4">
+                                {baseName} {item.quantity > 1 && <span className="text-tertiary text-sm font-medium">x{item.quantity}</span>}
+                            </h4>
+                            {itemNumber && (
+                                <Badge color="brand" size="sm" type="pill-color" className="font-black">
+                                    {itemNumber}
+                                </Badge>
+                            )}
+                        </div>
 
                     {/* Price */}
                     <div className="mb-6 flex items-baseline gap-2">
@@ -64,8 +87,9 @@ export const ItemAssigner = () => {
                             );
                         })}
                     </div>
-                </div>
-            ))}
+                    </div>
+                );
+            })}
         </div>
     );
 };
