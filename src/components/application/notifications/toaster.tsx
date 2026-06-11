@@ -4,12 +4,16 @@ import type { ToasterProps } from "sonner";
 import { Toaster as SonnerToaster, useSonner } from "sonner";
 import { cx } from "@/utils/cx";
 
-export const DEFAULT_TOAST_POSITION = "bottom-right";
+export const DEFAULT_TOAST_POSITION = "top-center";
 
 export const ToastsOverlay = () => {
     const { toasts } = useSonner();
 
     const styles = {
+        "top-center": {
+            className: "top-0 left-1/2 -translate-x-1/2",
+            background: "linear-gradient(180deg, rgba(0, 0, 0, 0.10) 0%, rgba(0, 0, 0, 0.00) 50%)",
+        },
         "top-right": {
             className: "top-0 right-0",
             background: "linear-gradient(215deg, rgba(0, 0, 0, 0.10) 0%, rgba(0, 0, 0, 0.00) 50%)",
@@ -51,7 +55,7 @@ export const ToastsOverlay = () => {
             ))}
             <div
                 className={cx(
-                    "pointer-events-none fixed right-0 bottom-0 left-0 z-40 h-67.5 w-full bg-linear-to-t from-black/10 to-transparent transition duration-500 xs:hidden",
+                    "pointer-events-none fixed right-0 top-0 left-0 z-40 h-67.5 w-full bg-linear-to-b from-black/10 to-transparent transition duration-500 xs:hidden",
                     positions.length > 0 ? "visible opacity-100" : "invisible opacity-0",
                 )}
             />
